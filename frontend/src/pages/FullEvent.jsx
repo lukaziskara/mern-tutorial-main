@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+
 import GoalForm from "../components/GoalForm";
 import GoalItem from "../components/GoalItem";
+import TheEvent from "../components/TheEvent";
 import Spinner from "../components/Spinner";
 import { getGoals, reset } from "../features/goals/goalSlice";
 // import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
@@ -10,13 +14,16 @@ import { getGoals, reset } from "../features/goals/goalSlice";
 function Dashboard() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { id } = useParams();
+  console.log(id);
 
   const { user } = useSelector((state) => state.auth);
   const { goals, isLoading, isError, message } = useSelector(
     (state) => state.goals
   );
-  // const { users } = useSelector((state) => state.users);
-  // console.log(users);
+  const [data, setData] = useState();
+  // const [isLoading, setLoading] = React.useState(true);
+
   const [isAscending, setIsAscending] = useState(true);
 
   useEffect(() => {
@@ -28,7 +35,7 @@ function Dashboard() {
       navigate("/login");
     }
 
-    dispatch(getGoals());
+    dispatch(getGoals(id));
 
     return () => {
       dispatch(reset());
@@ -39,10 +46,8 @@ function Dashboard() {
     return <Spinner />;
   }
 
-  const toggleSortOrder = () => {
-    setIsAscending(!isAscending);
-  };
   console.log(
+    goals,
     goals
       .slice()
       .sort((a, b) =>
@@ -51,13 +56,22 @@ function Dashboard() {
           : new Date(b.date) - new Date(a.date)
       )
   );
-  const sortedGoals = goals
-    .slice()
-    .sort((a, b) =>
-      isAscending
-        ? new Date(a.date) - new Date(b.date)
-        : new Date(b.date) - new Date(a.date)
-    );
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  // useEffect(() => {
+  //   axios
+  //     .get(`/posts/${id}`)
+  //     .then((res) => {
+  //       setData(res.data);
+  //       console.log(res.data);
+  //       // setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.warn(err);
+  //       alert("Ошибка при получении статьи");
+  //     });
+  // }, []);
 
   return (
     <>
@@ -67,25 +81,7 @@ function Dashboard() {
       </section>
 
       <GoalForm />
-
-      <section className="content">
-        {goals.length > 0 ? (
-          <div className="goals">
-            <div className="sorting">
-              <span>Sort by Date:</span>
-              <button className="sort-btn" onClick={toggleSortOrder}>
-                {isAscending ? "↥" : "↧"}
-              </button>
-              <button onClick={() => setIsAscending(null)}>button</button>
-            </div>
-            {sortedGoals.map((goal) => (
-              <GoalItem key={goal._id} goal={goal} />
-            ))}
-          </div>
-        ) : (
-          <h3>You have not set any goals</h3>
-        )}
-      </section>
+      <TheEvent key={id} value={id} />
     </>
   );
 }
